@@ -1,9 +1,5 @@
 <div align="center">
-<p>
-   <a align="left" href="https://ultralytics.com/yolov5" target="_blank">
-   <img width="850" src="https://github.com/ultralytics/yolov5/releases/download/v1.0/splash.jpg"></a>
-</p>
-<br>
+
 <div>
    <a href="https://github.com/ultralytics/yolov5/actions"><img src="https://github.com/ultralytics/yolov5/workflows/CI%20CPU%20testing/badge.svg" alt="CI CPU testing"></a>
    <a href="https://zenodo.org/badge/latestdoi/264818686"><img src="https://zenodo.org/badge/264818686.svg" alt="YOLOv5 Citation"></a>
@@ -20,35 +16,6 @@ YOLOv5 🚀 is a family of object detection architectures and models pretrained 
  open-source research into future vision AI methods, incorporating lessons learned and best practices evolved over thousands of hours of research and development.
 </p>
 
-<div align="center">
-   <a href="https://github.com/ultralytics">
-   <img src="https://github.com/ultralytics/yolov5/releases/download/v1.0/logo-social-github.png" width="2%"/>
-   </a>
-   <img width="2%" />
-   <a href="https://www.linkedin.com/company/ultralytics">
-   <img src="https://github.com/ultralytics/yolov5/releases/download/v1.0/logo-social-linkedin.png" width="2%"/>
-   </a>
-   <img width="2%" />
-   <a href="https://twitter.com/ultralytics">
-   <img src="https://github.com/ultralytics/yolov5/releases/download/v1.0/logo-social-twitter.png" width="2%"/>
-   </a>
-   <img width="2%" />
-   <a href="https://www.producthunt.com/@glenn_jocher">
-   <img src="https://github.com/ultralytics/yolov5/releases/download/v1.0/logo-social-producthunt.png" width="2%"/>
-   </a>
-   <img width="2%" />
-   <a href="https://youtube.com/ultralytics">
-   <img src="https://github.com/ultralytics/yolov5/releases/download/v1.0/logo-social-youtube.png" width="2%"/>
-   </a>
-   <img width="2%" />
-   <a href="https://www.facebook.com/ultralytics">
-   <img src="https://github.com/ultralytics/yolov5/releases/download/v1.0/logo-social-facebook.png" width="2%"/>
-   </a>
-   <img width="2%" />
-   <a href="https://www.instagram.com/ultralytics/">
-   <img src="https://github.com/ultralytics/yolov5/releases/download/v1.0/logo-social-instagram.png" width="2%"/>
-   </a>
-</div>
 
 <!--
 <a align="center" href="https://ultralytics.com/yolov5" target="_blank">
@@ -75,10 +42,9 @@ git clone https://github.com/ultralytics/yolov5  # clone
 cd yolov5
 pip install -r requirements.txt  # install
 ```
-
 </details>
 
-<details open>
+<details >
 <summary>Inference</summary>
 
 Inference with YOLOv5 and [PyTorch Hub](https://github.com/ultralytics/yolov5/issues/36)
@@ -100,6 +66,76 @@ results = model(img)
 # Results
 results.print()  # or .show(), .save(), .crop(), .pandas(), etc.
 ```
+
+</details>
+
+<details open>
+<summary> my_training command</summary>
+
+```
+python train.py --img 128 --batch 1 --epochs 30 --data data/grass/data.yaml --cfg models/yolov5m.yaml --weights yolov5m.pt --workers 0
+
+#colab
+!python train.py --img 640 --batch 16 --epochs 300 --data /content/drive/MyDrive/grass/yolov5/data/grass/data.yaml --weights yolov5s.pt --cache
+
+```
+```
+python detect.py --source C:\Users\Jason\Desktop\20220416\IMG_9070.MOV --weights runs/train/exp18/weights/best.pt
+
+#colab
+!python detect.py --source /content/drive/MyDrive/grass/yolov5/IMG_9072.MOV --weights runs/train/exp/weights/best.pt --conf 0.3
+```
+
+```
+#python3
+
+import torch
+print(torch.cuda.is_available())
+#如果收到的是False 則無法使用gpu訓練，使用下列指令修復
+
+python -m pip install torch1.9.0+cu111 torchvision0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
+```
+
+```
+#讀取訓練出來的檔案
+
+model = torch.hub.load('ultralytics/yolov5', 'custom', path='./runs/train/exp/weights/best.pt', force_reload=True)
+model.eval()
+with torch.no_grad():
+
+    # Images
+    img2 = cv2.imread('./resources/test.png')[:, :, ::-1]  # OpenCV image (BGR to RGB)
+    cv2.imshow('img2',img2)
+
+    # Inference
+    results = model(img2, size=640)  # includes NMS
+
+    # results.display()
+    results.print()
+    results.save()  # or .show()
+
+    results.xyxy[0]  # img1 predictions (tensor)
+    results.pandas().xyxy[0] #取得圈出的框框 以及confidence
+
+   '''
+   #model.eval()的作用是不启用 Batch Normalization 和 Dropout。
+   训练完train样本后，生成的模型model要用来测试样本。
+   在model(test)之前，需要加上model.eval()，否则的话，有输入数据，
+   即使不训练，它也会改变权值。这是model中含有BN层和Dropout所带来的的性质。
+   '''
+
+   '''
+   with torch.no_grad()则主要是用于停止autograd模块的工作，
+   以起到加速和节省显存的作用。
+   它的作用是将该with语句包裹起来的部分停止梯度的更新，
+   从而节省了GPU算力和显存，但是并不会影响dropout和BN层的行为。
+   '''
+```
+
+
+
+![demo1](resources/demo1.gif)
+
 
 </details>
 
@@ -165,39 +201,6 @@ python train.py --data coco.yaml --cfg yolov5n.yaml --weights '' --batch-size 12
 * [Architecture Summary](https://github.com/ultralytics/yolov5/issues/6998)&nbsp; ⭐ NEW
 
 </details>
-
-## <div align="center">Environments</div>
-
-Get started in seconds with our verified environments. Click each icon below for details.
-
-<div align="center">
-    <a href="https://colab.research.google.com/github/ultralytics/yolov5/blob/master/tutorial.ipynb">
-        <img src="https://github.com/ultralytics/yolov5/releases/download/v1.0/logo-colab-small.png" width="15%"/>
-    </a>
-    <a href="https://www.kaggle.com/ultralytics/yolov5">
-        <img src="https://github.com/ultralytics/yolov5/releases/download/v1.0/logo-kaggle-small.png" width="15%"/>
-    </a>
-    <a href="https://hub.docker.com/r/ultralytics/yolov5">
-        <img src="https://github.com/ultralytics/yolov5/releases/download/v1.0/logo-docker-small.png" width="15%"/>
-    </a>
-    <a href="https://github.com/ultralytics/yolov5/wiki/AWS-Quickstart">
-        <img src="https://github.com/ultralytics/yolov5/releases/download/v1.0/logo-aws-small.png" width="15%"/>
-    </a>
-    <a href="https://github.com/ultralytics/yolov5/wiki/GCP-Quickstart">
-        <img src="https://github.com/ultralytics/yolov5/releases/download/v1.0/logo-gcp-small.png" width="15%"/>
-    </a>
-</div>
-
-## <div align="center">Integrations</div>
-
-<div align="center">
-    <a href="https://wandb.ai/site?utm_campaign=repo_yolo_readme">
-        <img src="https://github.com/ultralytics/yolov5/releases/download/v1.0/logo-wb-long.png" width="49%"/>
-    </a>
-    <a href="https://roboflow.com/?ref=ultralytics">
-        <img src="https://github.com/ultralytics/yolov5/releases/download/v1.0/logo-roboflow-long.png" width="49%"/>
-    </a>
-</div>
 
 |Weights and Biases|Roboflow ⭐ NEW|
 |:-:|:-:|
