@@ -131,7 +131,9 @@ with torch.no_grad():
    从而节省了GPU算力和显存，但是并不会影响dropout和BN层的行为。
    '''
 ```
-
+```
+python export.py --weights yolov5s.pt --include onnx
+```
 
 
 ![demo1](resources/demo1.gif)
